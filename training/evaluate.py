@@ -183,7 +183,7 @@ def main(args):
 
     # Create model
     num_classes = len(idx_to_class)
-    input_size = 225
+    input_size = int(checkpoint['args'].get('input_size', 225))
 
     print(f"\nCreating model: {checkpoint['args']['model']}")
 

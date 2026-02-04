@@ -129,10 +129,6 @@ def main(args):
     save_dir = Path(args.save_dir)
     save_dir.mkdir(exist_ok=True, parents=True)
 
-    # Save args
-    with open(save_dir / 'args.json', 'w') as f:
-        json.dump(vars(args), f, indent=2)
-
     # Create dataloaders
     print("\n" + "="*60)
     print("Creating dataloaders...")
@@ -147,10 +143,22 @@ def main(args):
     )
 
     num_classes = len(idx_to_class)
-    input_size = 225  # MediaPipe keypoints
+
+    # Infer feature dimension from actual dataset instead of hardcoding.
+    try:
+        sample_batch, _ = next(iter(train_loader))
+    except StopIteration as exc:
+        raise RuntimeError("Train dataset is empty after filtering.") from exc
+    input_size = int(sample_batch.shape[-1])
+    args.input_size = input_size
+
+    # Save args (including inferred input_size)
+    with open(save_dir / 'args.json', 'w') as f:
+        json.dump(vars(args), f, indent=2)
 
     print(f"\nDataset info:")
     print(f"  Classes: {num_classes}")
+    print(f"  Input size: {input_size}")
     print(f"  Train batches: {len(train_loader)}")
     print(f"  Test batches: {len(test_loader)}")
 
