@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     api_version: str = "1.0.0"
 
     # Model settings
-    model_path: str = "../training/models/lstm_baseline/best_model.pth"
+    model_path: str = "../training/models/lstm_test/best_model.pth"
 
     # CORS settings
     allowed_origins: List[str] = ["*"]  # In production, specify exact origins

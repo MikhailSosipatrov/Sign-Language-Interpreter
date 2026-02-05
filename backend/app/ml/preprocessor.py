@@ -15,14 +15,16 @@ def normalize_keypoints(keypoints: np.ndarray) -> np.ndarray:
     Returns:
         normalized keypoints
     """
-    keypoints_copy = keypoints.copy()
-    keypoints_copy[keypoints_copy == 0] = np.nan
-
-    mean = np.nanmean(keypoints_copy, axis=0, keepdims=True)
-    mean = np.nan_to_num(mean)
-
-    normalized = keypoints - mean
-    return normalized
+    mask = keypoints != 0
+    counts = mask.sum(axis=0, keepdims=True)
+    sums = np.where(mask, keypoints, 0.0).sum(axis=0, keepdims=True)
+    mean = np.divide(
+        sums,
+        counts,
+        out=np.zeros_like(sums, dtype=np.float32),
+        where=counts > 0,
+    )
+    return keypoints - mean
 
 
 def pad_or_trim(keypoints: np.ndarray, target_length: int = 60) -> np.ndarray:

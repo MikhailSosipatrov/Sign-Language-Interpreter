@@ -34,10 +34,10 @@ async def predict_from_keypoints(
     """
     Predict sign from keypoints
 
-    Accepts MediaPipe keypoints array and returns predicted sign with confidence scores.
+    Accepts keypoints array and returns predicted sign with confidence scores.
 
     Args:
-        data: KeypointsRequest with keypoints array of shape (num_frames, 225)
+        data: KeypointsRequest with keypoints array of shape (num_frames, input_size)
 
     Returns:
         PredictionResponse with predicted sign and top-K results
@@ -66,10 +66,14 @@ async def predict_from_keypoints(
                 detail=f"Invalid keypoints shape. Expected 2D array, got {keypoints_array.ndim}D"
             )
 
-        if keypoints_array.shape[1] != 225:
+        expected_features = predictor.input_size
+        if keypoints_array.shape[1] != expected_features:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid number of features. Expected 225, got {keypoints_array.shape[1]}"
+                detail=(
+                    f"Invalid number of features. "
+                    f"Expected {expected_features}, got {keypoints_array.shape[1]}"
+                )
             )
 
         # Make prediction
@@ -100,5 +104,5 @@ async def get_stats(request: Request):
         "num_classes": len(predictor.idx_to_class),
         "sequence_length": predictor.sequence_length,
         "device": str(predictor.device),
-        "input_size": 225
+        "input_size": predictor.input_size
     }

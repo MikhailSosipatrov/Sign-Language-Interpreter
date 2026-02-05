@@ -318,7 +318,7 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">Keypoints</div>
-                    <div class="stat-value" id="keypointsCount">0 / 225</div>
+                    <div class="stat-value" id="keypointsCount">0 / 189</div>
                 </div>
             </div>
 
@@ -356,7 +356,9 @@
         let isRunning = false;
 
         // Demo mode variables
-        const DEMO_MODE = true; // Установить false когда модель будет обучена
+        const DEMO_MODE = false; // Установить false когда модель будет обучена
+        // 189 features: 21 left hand + 21 right hand + 21 selected pose points.
+        const THIRD_STREAM_POSE_INDICES = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 1, 2, 3, 4];
         let demoGestures = ['Привет', 'Спасибо', 'Пожалуйста', 'Да', 'Нет', 'Хорошо', 'Плохо', 'Помощь'];
         let demoIndex = 0;
 
@@ -422,7 +424,7 @@
                 lastFpsUpdate = now;
             }
             document.getElementById('framesProcessed').textContent = frameCount;
-            document.getElementById('keypointsCount').textContent = `${detectedPoints} / 225`;
+            document.getElementById('keypointsCount').textContent = `${detectedPoints} / 189`;
 
             // Send to server or demo
             if (DEMO_MODE) {
@@ -453,14 +455,18 @@
                 keypoints.push(...Array(63).fill(0));
             }
 
-            // Pose (33 × 3 = 99)
+            // Third stream from selected pose points (21 × 3 = 63)
             if (results.poseLandmarks) {
-                for (let i = 0; i < Math.min(33, results.poseLandmarks.length); i++) {
-                    const lm = results.poseLandmarks[i];
-                    keypoints.push(lm.x, lm.y, lm.z);
-                }
+                THIRD_STREAM_POSE_INDICES.forEach(idx => {
+                    const lm = results.poseLandmarks[idx];
+                    if (lm) {
+                        keypoints.push(lm.x, lm.y, lm.z);
+                    } else {
+                        keypoints.push(0, 0, 0);
+                    }
+                });
             } else {
-                keypoints.push(...Array(99).fill(0));
+                keypoints.push(...Array(63).fill(0));
             }
 
             return keypoints;
@@ -470,7 +476,7 @@
             let count = 0;
             if (results.leftHandLandmarks) count += 21;
             if (results.rightHandLandmarks) count += 21;
-            if (results.poseLandmarks) count += 33;
+            if (results.poseLandmarks) count += 21;
             return count;
         }
 

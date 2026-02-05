@@ -88,7 +88,7 @@ async def websocket_predict(websocket: WebSocket):
     """
     WebSocket endpoint for real-time sign language recognition
 
-    Client sends: {"keypoints": [225 float values]}
+    Client sends: {"keypoints": [N float values]} where N matches model input_size (189 now)
     Server responds with predictions
     """
     if app.state.predictor is None:

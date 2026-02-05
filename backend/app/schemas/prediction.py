@@ -36,12 +36,15 @@ class PredictionResponse(BaseModel):
 
 class KeypointsRequest(BaseModel):
     """Request model for keypoints prediction"""
-    keypoints: List[List[float]] = Field(..., description="Keypoints array of shape (num_frames, 225)")
+    keypoints: List[List[float]] = Field(
+        ...,
+        description="Keypoints array of shape (num_frames, input_size). Current model uses 189 features.",
+    )
 
     class Config:
         json_schema_extra = {
             "example": {
-                "keypoints": [[0.1] * 225 for _ in range(60)]
+                "keypoints": [[0.1] * 189 for _ in range(60)]
             }
         }
 
